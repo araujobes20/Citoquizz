@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quizzlab</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07090f;
+    --bg2: #0d1220;
+    --bg3: #111827;
+    --panel: #141c2e;
+    --border: #1e2d4a;
+    --accent: #00d4aa;
+    --accent2: #00a8ff;
+    --accent3: #ff4757;
+    --accent4: #ffa502;
+    --text: #e2eaf8;
+    --text2: #8ba3c7;
+    --text3: #4a6080;
+    --glow: 0 0 20px rgba(0,212,170,0.3);
+    --glow2: 0 0 20px rgba(0,168,255,0.3);
+    --radius: 10px;
+    --mono: 'Share Tech Mono', monospace;
+    --head: 'Rajdhani', sans-serif;
+    --body: 'Nunito', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    min-height: 100vh;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ─── GRID BACKGROUND ─── */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none; z-index:0;
+  }
+
+  /* ─── SCANLINES ─── */
+  body::after {
+    content:'';
+    position:fixed; inset:0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+    );
+    pointer-events:none; z-index:0;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen {
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    z-index:10;
+    opacity:0; pointer-events:none;
+    transition: opacity .35s ease;
+  }
+  .screen.active { opacity:1; pointer-events:all; }
+
+  /* ─── LANDING ─── */
+  #screen-landing {
+    flex-direction:column; gap:0;
+    background: radial-gradient(ellipse at 50% 40%, #0a1628 0%, var(--bg) 70%);
+  }
+
+  .landing-inner {
+    text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:28px;
+    padding: 40px;
+    max-width: 560px; width:100%;
+  }
+
+  .logo-badge {
+    width:90px; height:90px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius:24px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:42px;
+    box-shadow: 0 0 40px rgba(0,212,170,0.4), 0 0 80px rgba(0,168,255,0.2);
+    animation: pulse-badge 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%,100%{ box-shadow:0 0 40px rgba(0,212,170,0.4),0 0 80px rgba(0,168,255,0.2); }
+    50%{ box-shadow:0 0 60px rgba(0,212,170,0.6),0 0 120px rgba(0,168,255,0.3); }
+  }
+
+  .landing-title {
+    font-family: var(--head);
+    font-size: 3.2rem;
+    font-weight:700;
+    letter-spacing:4px;
+    line-height:1;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+
+  .landing-sub {
+    font-family: var(--mono);
+    font-size:.85rem;
+    color: var(--text2);
+    letter-spacing:3px;
+    text-transform:uppercase;
+  }
+
+  .landing-desc {
+    font-size:1rem;
+    color: var(--text2);
+    line-height:1.6;
+    max-width:420px;
+  }
+
+  .cats {
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+  }
+
+  .cat-tag {
+    padding:4px 12px;
+    background: rgba(0,212,170,0.08);
+    border:1px solid rgba(0,212,170,0.2);
+    border-radius:20px;
+    font-size:.75rem;
+    font-family:var(--mono);
+    color:var(--accent);
+    letter-spacing:1px;
+  }
+
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:14px 32px;
+    border:none; border-radius:var(--radius);
+    font-family:var(--head); font-size:1.1rem; font-weight:600;
+    letter-spacing:2px; text-transform:uppercase;
+    cursor:pointer;
+    transition: all .2s ease;
+    position:relative; overflow:hidden;
+  }
+
+  .btn::after {
+    content:'';
+    position:absolute; inset:0;
+    background:rgba(255,255,255,0);
+    transition:.2s;
+  }
+  .btn:hover::after { background:rgba(255,255,255,0.06); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color:#07090f;
+    box-shadow: 0 4px 20px rgba(0,212,170,0.4);
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,212,170,0.5); }
+  .btn-primary:active { transform:translateY(0); }
+
+  .btn-outline {
+    background:transparent;
+    color:var(--text2);
+    border:1px solid var(--border);
+  }
+  .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #ff4757, #c0392b);
+    color:#fff;
+    box-shadow: 0 4px 20px rgba(255,71,87,0.3);
+  }
+  .btn-danger:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(255,71,87,0.4); }
+
+  .btn-sm { padding:8px 18px; font-size:.85rem; }
+
+  /* ─── NAME SCREEN ─── */
+  #screen-name {
+    flex-direction:column;
+    gap:32px;
+    padding:40px;
+  }
+
+  .card {
+    background: var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:40px;
+    max-width:480px;
+    width:100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .card-title {
+    font-family: var(--head);
+    font-size:1.8rem;
+    font-weight:700;
+    letter-spacing:2px;
+    margin-bottom:8px;
+    color:var(--text);
+  }
+
+  .card-sub {
+    font-size:.85rem;
+    color:var(--text2);
+    margin-bottom:28px;
+    font-family:var(--mono);
+    letter-spacing:1px;
+  }
+
+  .field {
+    display:flex; flex-direction:column; gap:8px;
+    margin-bottom:20px;
+  }
+
+  .field label {
+    font-size:.8rem;
+    font-family:var(--mono);
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--text2);
+  }
+
+  .field input, .field select, .field textarea {
+    background: var(--bg3);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    color:var(--text);
+    font-family:var(--body);
+    font-size:1rem;
+    padding:12px 16px;
+    outline:none;
+    transition:.2s;
+    width:100%;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color:var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,170,0.1);
+  }
+
+  .field textarea { resize:vertical; min-height:80px; }
+
+  /* ─── QUIZ SCREEN ─── */
+  #screen-quiz {
+    flex-direction:column;
+    padding: 0;
+    align-items:stretch;
+    justify-content:flex-start;
+  }
+
+  .quiz-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+    background: var(--bg2);
+    border-bottom:1px solid var(--border);
+    position:relative; z-index:20;
+  }
+
+  .quiz-info {
+    display:flex; align-items:center; gap:24px;
+  }
+
+  .q-counter {
+    font-family:var(--mono);
+    font-size:.9rem;
+    color:var(--text2);
+  }
+  .q-counter span { color:var(--accent); font-weight:bold; }
+
+  .quiz-category {
+    padding:3px 10px;
+    background:rgba(0,168,255,0.1);
+    border:1px solid rgba(0,168,255,0.2);
+    border-radius:20px;
+    font-size:.7rem;
+    font-family:var(--mono);
+    color:var(--accent2);
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+
+  /* TIMER */
+  .timer-wrap {
+    display:flex; align-items:center; gap:12px;
+  }
+
+  .timer-ring {
+    position:relative; width:48px; height:48px;
+  }
+
+  .timer-ring svg { transform:rotate(-90deg); }
+
+  .timer-ring circle {
+    fill:none;
+    stroke-width:3;
+  }
+
+  .timer-ring .bg { stroke:var(--border); }
+  .timer-ring .fg {
+    stroke:var(--accent);
+    stroke-dasharray:132;
+    stroke-dashoffset:0;
+    stroke-linecap:round;
+    transition: stroke-dashoffset .9s linear, stroke .5s;
+  }
+
+  .timer-num {
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono);
+    font-size:.9rem;
+    font-weight:bold;
+    color:var(--accent);
+  }
+
+  .timer-label {
+    font-family:var(--mono);
+    font-size:.75rem;
+    color:var(--text2);
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+
+  .quiz-body {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+    padding: 24px;
+    gap:24px;
+    max-width:900px;
+    margin:0 auto;
+    width:100%;
+  }
+
+  .media-box {
+    background: var(--bg2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    position:relative;
+    min-height:200px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .media-box img {
+    max-width:100%;
+    max-height:340px;
+    object-fit:contain;
+    display:block;
+  }
+
+  .media-box video {
+    max-width:100%;
+    max-height:340px;
+    display:block;
+  }
+
+  .no-media {
+    color:var(--text3);
+    font-family:var(--mono);
+    font-size:.85rem;
+    letter-spacing:2px;
+  }
+
+  .q-text {
+    font-size:1.15rem;
+    line-height:1.6;
+    color:var(--text);
+  }
+
+  .options-grid {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .option-btn {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 18px;
+    background: var(--bg3);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition: all .2s ease;
+    text-align:left;
+    width:100%;
+    color:var(--text);
+    font-family:var(--body);
+    font-size:1rem;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .option-btn::before {
+    content:'';
+    position:absolute; left:0; top:0; bottom:0;
+    width:3px;
+    background:transparent;
+    transition:.2s;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color:var(--accent);
+    background: rgba(0,212,170,0.05);
+    transform:translateX(4px);
+  }
+  .option-btn:hover:not(:disabled)::before { background:var(--accent); }
+
+  .option-btn:disabled { cursor:default; }
+
+  .option-btn.correct {
+    border-color:#2ecc71;
+    background:rgba(46,204,113,0.1);
+  }
+  .option-btn.correct::before { background:#2ecc71; }
+
+  .option-btn.wrong {
+    border-color:var(--accent3);
+    background:rgba(255,71,87,0.1);
+  }
+  .option-btn.wrong::before { background:var(--accent3); }
+
+  .opt-letter {
+    width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:6px;
+    background:var(--border);
+    font-family:var(--mono);
+    font-size:.9rem;
+    font-weight:bold;
+    flex-shrink:0;
+    transition:.2s;
+    color:var(--text2);
+  }
+
+  .option-btn:hover:not(:disabled) .opt-letter {
+    background:var(--accent);
+    color:#07090f;
+  }
+
+  .option-btn.correct .opt-letter {
+    background:#2ecc71;
+    color:#07090f;
+  }
+
+  .option-btn.wrong .opt-letter {
+    background:var(--accent3);
+    color:#fff;
+  }
+
+  .progress-bar-wrap {
+    position:fixed;
+    bottom:0; left:0; right:0;
+    height:4px;
+    background:var(--border);
+    z-index:100;
+  }
+
+  .progress-bar {
+    height:100%;
+    background:linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s ease;
+  }
+
+  /* ─── RESULTS SCREEN ─── */
+  #screen-results {
+    flex-direction:column;
+    padding:40px;
+    overflow-y:auto;
+  }
+
+  .results-card {
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:48px 40px;
+    max-width:560px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .score-ring {
+    width:160px; height:160px;
+    margin: 0 auto 32px;
+    position:relative;
+  }
+
+  .score-ring svg { transform:rotate(-90deg); }
+
+  .score-ring .bg { stroke:var(--border); fill:none; stroke-width:8; }
+  .score-ring .fg {
+    fill:none; stroke-width:8;
+    stroke:var(--accent);
+    stroke-dasharray:440;
+    stroke-dashoffset:440;
+    stroke-linecap:round;
+    transition: stroke-dashoffset 1.5s cubic-bezier(.17,.67,.4,1.3);
+  }
+
+  .score-center {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+
+  .score-num {
+    font-family:var(--head);
+    font-size:2.4rem;
+    font-weight:700;
+    color:var(--accent);
+    line-height:1;
+  }
+
+  .score-label {
+    font-family:var(--mono);
+    font-size:.7rem;
+    color:var(--text2);
+    letter-spacing:2px;
+    margin-top:4px;
+  }
+
+  .results-title {
+    font-family:var(--head);
+    font-size:2rem;
+    font-weight:700;
+    letter-spacing:3px;
+    margin-bottom:8px;
+  }
+
+  .results-sub {
+    font-size:.9rem;
+    color:var(--text2);
+    margin-bottom:32px;
+  }
+
+  .stats-row {
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+    margin-bottom:32px;
+  }
+
+  .stat-box {
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 8px;
+  }
+
+  .stat-val {
+    font-family:var(--mono);
+    font-size:1.4rem;
+    font-weight:bold;
+    color:var(--accent);
+  }
+
+  .stat-lbl {
+    font-size:.72rem;
+    color:var(--text2);
+    margin-top:4px;
+    font-family:var(--mono);
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+
+  .sending-indicator {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-family:var(--mono);
+    font-size:.8rem;
+    color:var(--text3);
+    margin-bottom:16px;
+  }
+
+  .dot-anim {
+    display:inline-flex; gap:4px;
+  }
+
+  .dot-anim span {
+    width:6px; height:6px;
+    background:var(--accent);
+    border-radius:50%;
+    animation:dot-bounce .8s infinite;
+  }
+
+  .dot-anim span:nth-child(2) { animation-delay:.15s; }
+  .dot-anim span:nth-child(3) { animation-delay:.3s; }
+
+  @keyframes dot-bounce {
+    0%,80%,100%{ transform:scale(0); }
+    40%{ transform:scale(1); }
+  }
+
+  /* ─── LOCKOUT OVERLAY ─── */
+  #lockout-overlay {
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(7,9,15,0.97);
+    z-index:9999;
+    flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:20px;
+  }
+
+  #lockout-overlay.show { display:flex; }
+
+  .lockout-icon { font-size:64px; }
+
+  .lockout-title {
+    font-family:var(--head);
+    font-size:2rem;
+    font-weight:700;
+    color:var(--accent3);
+    letter-spacing:3px;
+  }
+
+  .lockout-msg {
+    font-size:1rem;
+    color:var(--text2);
+    text-align:center;
+    max-width:360px;
+    line-height:1.6;
+  }
+
+  .lockout-counter {
+    font-family:var(--mono);
+    font-size:1.2rem;
+    color:var(--accent4);
+  }
+
+  /* ─── TEACHER LOGIN ─── */
+  #screen-teacher-login {
+    flex-direction:column;
+  }
+
+  /* ─── TEACHER PANEL ─── */
+  #screen-teacher {
+    flex-direction:column;
+    padding:0;
+    align-items:stretch;
+    justify-content:flex-start;
+    overflow-y:auto;
+  }
+
+  .teacher-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 32px;
+    background:var(--bg2);
+    border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:20;
+  }
+
+  .teacher-header-title {
+    font-family:var(--head);
+    font-size:1.4rem;
+    font-weight:700;
+    letter-spacing:3px;
+    color:var(--accent);
+  }
+
+  .teacher-body {
+    padding:32px;
+    max-width:960px;
+    margin:0 auto;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:32px;
+  }
+
+  .section-title {
+    font-family:var(--head);
+    font-size:1.3rem;
+    font-weight:700;
+    letter-spacing:2px;
+    color:var(--text);
+    margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+
+  .section-title::after {
+    content:'';
+    flex:1; height:1px;
+    background:var(--border);
+  }
+
+  .q-list {
+    display:flex; flex-direction:column; gap:10px;
+  }
+
+  .q-item {
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px 20px;
+    display:flex; align-items:flex-start; gap:16px;
+  }
+
+  .q-item-num {
+    font-family:var(--mono);
+    font-size:1rem;
+    color:var(--accent);
+    font-weight:bold;
+    width:30px;
+    flex-shrink:0;
+  }
+
+  .q-item-content { flex:1; min-width:0; }
+
+  .q-item-text {
+    font-size:.95rem;
+    margin-bottom:6px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .q-item-meta {
+    font-family:var(--mono);
+    font-size:.72rem;
+    color:var(--text3);
+    letter-spacing:1px;
+  }
+
+  .q-item-actions {
+    display:flex; gap:8px; flex-shrink:0;
+  }
+
+  .btn-icon {
+    width:32px; height:32px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--bg2);
+    color:var(--text2);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+    transition:.2s;
+  }
+
+  .btn-icon:hover { border-color:var(--accent); color:var(--accent); }
+  .btn-icon.del:hover { border-color:var(--accent3); color:var(--accent3); }
+
+  /* MODAL */
+  .modal-bg {
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(7,9,15,0.85);
+    z-index:500;
+    align-items:center; justify-content:center;
+    padding:20px;
+  }
+
+  .modal-bg.show { display:flex; }
+
+  .modal {
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:36px;
+    max-width:600px;
+    width:100%;
+    max-height:90vh;
+    overflow-y:auto;
+    box-shadow:0 30px 80px rgba(0,0,0,0.7);
+  }
+
+  .modal-title {
+    font-family:var(--head);
+    font-size:1.5rem;
+    font-weight:700;
+    letter-spacing:2px;
+    margin-bottom:24px;
+    color:var(--text);
+  }
+
+  .options-edit {
+    display:flex; flex-direction:column; gap:8px;
+  }
+
+  .option-edit-row {
+    display:flex; align-items:center; gap:10px;
+  }
+
+  .opt-badge {
+    width:28px; height:28px;
+    background:var(--border);
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono);
+    font-size:.8rem;
+    font-weight:bold;
+    color:var(--text2);
+    flex-shrink:0;
+  }
+
+  .opt-badge.correct-opt {
+    background:var(--accent);
+    color:#07090f;
+  }
+
+  .option-edit-row input {
+    flex:1;
+  }
+
+  .radio-correct {
+    accent-color:var(--accent);
+    width:16px; height:16px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+
+  .settings-box {
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    display:flex; flex-direction:column; gap:16px;
+  }
+
+  .settings-hint {
+    font-family:var(--mono);
+    font-size:.72rem;
+    color:var(--text3);
+    line-height:1.5;
+    letter-spacing:.5px;
+  }
+
+  .tag-success {
+    padding:3px 10px;
+    background:rgba(46,204,113,0.1);
+    border:1px solid rgba(46,204,113,0.3);
+    border-radius:20px;
+    font-size:.72rem;
+    font-family:var(--mono);
+    color:#2ecc71;
+    letter-spacing:1px;
+    display:inline-block;
+  }
+
+  .tag-error {
+    padding:3px 10px;
+    background:rgba(255,71,87,0.1);
+    border:1px solid rgba(255,71,87,0.3);
+    border-radius:20px;
+    font-size:.72rem;
+    font-family:var(--mono);
+    color:var(--accent3);
+    letter-spacing:1px;
+    display:inline-block;
+  }
+
+  .divider {
+    height:1px;
+    background:var(--border);
+    margin:8px 0;
+  }
+
+  /* TOAST */
+  #toast {
+    position:fixed; bottom:24px; right:24px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 20px;
+    font-family:var(--mono);
+    font-size:.85rem;
+    color:var(--text);
+    z-index:9000;
+    transform:translateY(100px);
+    opacity:0;
+    transition:.3s cubic-bezier(.17,.67,.4,1.2);
+    max-width:320px;
+  }
+
+  #toast.show {
+    transform:translateY(0);
+    opacity:1;
+  }
+
+  #toast.success { border-color:var(--accent); }
+  #toast.error { border-color:var(--accent3); }
+
+  /* Responsivo */
+  @media(max-width:600px){
+    .quiz-body { padding:16px; gap:16px; }
+    .landing-title { font-size:2.2rem; }
+    .teacher-body { padding:20px; }
+    .stats-row { grid-template-columns:1fr 1fr; }
+  }
+
+  .shake {
+    animation:shake .4s ease;
+  }
+
+  @keyframes shake {
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-8px); }
+    40%{ transform:translateX(8px); }
+    60%{ transform:translateX(-6px); }
+    80%{ transform:translateX(6px); }
+  }
+
+  .fade-in {
+    animation:fadeIn .4s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  select option { background:var(--bg3); color:var(--text); }
+
+  .empty-state {
+    text-align:center;
+    padding:40px;
+    color:var(--text3);
+    font-family:var(--mono);
+    font-size:.9rem;
+    letter-spacing:1px;
+    border:1px dashed var(--border);
+    border-radius:var(--radius);
+  }
+
+  .media-type-row {
+    display:flex; gap:10px; margin-bottom:12px;
+  }
+
+  .media-type-btn {
+    padding:6px 16px;
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:6px;
+    color:var(--text2);
+    font-family:var(--mono);
+    font-size:.8rem;
+    letter-spacing:1px;
+    cursor:pointer;
+    transition:.2s;
+  }
+
+  .media-type-btn.active {
+    background:rgba(0,212,170,0.1);
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  .results-list {
+    display:flex; flex-direction:column; gap:8px;
+    max-height:300px;
+    overflow-y:auto;
+  }
+
+  .result-row {
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 16px;
+    gap:12px;
+  }
+
+  .result-name {
+    font-weight:600;
+    flex:1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .result-score {
+    font-family:var(--mono);
+    font-size:.9rem;
+    color:var(--accent);
+  }
+
+  .result-correct {
+    font-family:var(--mono);
+    font-size:.8rem;
+    color:var(--text2);
+  }
+
+  .result-time {
+    font-family:var(--mono);
+    font-size:.72rem;
+    color:var(--text3);
+    white-space:nowrap;
+  }
+
+  .warn-box {
+    background:rgba(255,165,2,0.08);
+    border:1px solid rgba(255,165,2,0.25);
+    border-radius:var(--radius);
+    padding:14px 18px;
+    font-family:var(--mono);
+    font-size:.8rem;
+    color:var(--accent4);
+    line-height:1.5;
+    letter-spacing:.5px;
+  }
+
+  .divider { height:1px; background:var(--border); margin:8px 0; }
+
+  .sync-code-box {
+    background:var(--bg);
+    border:1px solid var(--accent);
+    border-radius:8px;
+    padding:12px 14px;
+    font-family:var(--mono);
+    font-size:.72rem;
+    color:var(--accent2);
+    word-break:break-all;
+    line-height:1.6;
+    max-height:120px;
+    overflow-y:auto;
+    cursor:text;
+    user-select:all;
+    -webkit-user-select:all;
+  }
+
+  .sync-tab-row {
+    display:flex; gap:0; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:16px;
+  }
+
+  .sync-tab {
+    flex:1; padding:9px 0;
+    background:var(--bg3); color:var(--text2);
+    border:none; cursor:pointer;
+    font-family:var(--mono); font-size:.78rem; letter-spacing:1px;
+    transition:.2s;
+  }
+
+  .sync-tab.active { background:rgba(0,212,170,0.12); color:var(--accent); }
+  .sync-tab:not(:last-child) { border-right:1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SCREENS ═══════════════════════ -->
+
+<!-- LANDING -->
+<div class="screen active" id="screen-landing">
+  <div class="landing-inner fade-in">
+    <div class="logo-badge">🔬</div>
+    <div>
+      <div class="landing-title">Quizzlab</div>
+      <div class="landing-sub">Avaliação Diagnóstica Interativa</div>
+    </div>
+    <p class="landing-desc">
+      Teste seu conhecimento.
+    </p>
+    <div class="cats">
+      <span class="cat-tag">Prof. Bruno Araujo</span>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <button class="btn btn-primary" onclick="goToName()">▶ Iniciar Avaliação</button>
+      <button class="btn btn-outline btn-sm" onclick="showScreen('screen-teacher-login')" style="margin-top:4px">⚙ Área do Professor</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAME ENTRY -->
+<div class="screen" id="screen-name">
+  <div class="card fade-in">
+    <div class="card-title">🎓 Identificação</div>
+    <div class="card-sub">// ANTES DE COMEÇAR</div>
+    <div class="field">
+      <label>Seu nome completo</label>
+      <input type="text" id="student-name" placeholder="Ex: Maria Silva" maxlength="80" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Matrícula</label>
+      <input type="text" id="student-class" placeholder="Ex: Turma A / Matrícula" maxlength="40" autocomplete="off">
+    </div>
+    <div class="warn-box" style="margin-bottom:20px;">
+      ⚠ Durante a avaliação, não será permitido sair ou trocar de aba. Tentativas de abandono serão registradas e podem anular a prova.
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="startQuiz()">Começar Avaliação →</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-header">
+    <div class="quiz-info">
+      <div class="q-counter">Questão <span id="q-current">1</span> de <span id="q-total">10</span></div>
+      <div class="quiz-category" id="q-category">Hematologia</div>
+    </div>
+    <div class="timer-wrap">
+      <div class="timer-label">TEMPO</div>
+      <div class="timer-ring">
+        <svg viewBox="0 0 48 48" width="48" height="48">
+          <circle class="bg" cx="24" cy="24" r="21"/>
+          <circle class="fg" id="timer-circle" cx="24" cy="24" r="21"/>
+        </svg>
+        <div class="timer-num" id="timer-num">30</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-body" id="quiz-body">
+    <div class="media-box" id="media-box">
+      <span class="no-media">SEM MÍDIA</span>
+    </div>
+    <div class="q-text" id="q-text">Texto da questão</div>
+    <div class="options-grid" id="options-grid"></div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="screen-results">
+  <div class="results-card fade-in">
+    <div class="score-ring">
+      <svg viewBox="0 0 160 160" width="160" height="160">
+        <circle class="bg" cx="80" cy="80" r="70"/>
+        <circle class="fg" id="results-ring" cx="80" cy="80" r="70"/>
+      </svg>
+      <div class="score-center">
+        <div class="score-num" id="final-score">0</div>
+        <div class="score-label">PONTOS</div>
+      </div>
+    </div>
+
+    <div class="results-title" id="results-title">PARABÉNS!</div>
+    <div class="results-sub" id="results-sub">Avaliação concluída</div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" id="stat-correct">0</div>
+        <div class="stat-lbl">Acertos</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="stat-wrong">0</div>
+        <div class="stat-lbl">Erros</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="stat-pct">0%</div>
+        <div class="stat-lbl">Aproveitamento</div>
+      </div>
+    </div>
+
+    <div class="sending-indicator" id="sending-indicator">
+      <div class="dot-anim"><span></span><span></span><span></span></div>
+      Enviando resultado...
+    </div>
+    <div id="send-status"></div>
+
+    <button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="showScreen('screen-landing')">↩ Voltar ao início</button>
+  </div>
+</div>
+
+<!-- TEACHER LOGIN -->
+<div class="screen" id="screen-teacher-login">
+  <div class="card fade-in">
+    <div class="card-title">🔐 Área do Professor</div>
+    <div class="card-sub">// ACESSO RESTRITO</div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="teacher-password" placeholder="••••••••••" onkeydown="if(event.key==='Enter')teacherLogin()">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" style="flex:1" onclick="teacherLogin()">Entrar</button>
+      <button class="btn btn-outline btn-sm" onclick="showScreen('screen-landing')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEACHER PANEL -->
+<div class="screen" id="screen-teacher">
+  <div class="teacher-header">
+    <div class="teacher-header-title">⚙ PAINEL DO PROFESSOR</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="openAddModal()">+ Nova Questão</button>
+      <button class="btn btn-outline btn-sm" onclick="showScreen('screen-landing')">Sair</button>
+    </div>
+  </div>
+
+  <div class="teacher-body">
+
+    <!-- SETTINGS -->
+    <div>
+      <div class="section-title">⚙ Configurações</div>
+      <div class="settings-box">
+        <div class="field" style="margin:0">
+          <label>URL do Google Apps Script (Webhook)</label>
+          <input type="url" id="sheets-url" placeholder="https://script.google.com/macros/s/AKfycbwEoaze-My_UAVqZmrAawikCIBIKYzlak4d-9K5Q2rB7ZdLq84ud5RtyUKVqALuOL8r/exec">
+        </div>
+        <div class="settings-hint">
+          Cole aqui a URL gerada após publicar o Apps Script como Web App.<br>
+          Veja as instruções na seção abaixo para configurar o Google Sheets.
+        </div>
+        <div class="field" style="margin:0">
+          <label>Tempo por questão (segundos)</label>
+          <input type="number" id="time-per-q" placeholder="30" min="5" max="120">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()">💾 Salvar Configurações</button>
+      </div>
+    </div>
+
+    <!-- RESULTS LOCAL -->
+    <div>
+      <div class="section-title">📊 Resultados Locais</div>
+      <div id="local-results-list">
+        <div class="empty-state">Nenhum resultado local registrado</div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;">
+        <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
+        <button class="btn btn-outline btn-sm btn-danger-soft" onclick="clearLocalResults()" style="color:var(--accent3);border-color:var(--accent3)">🗑 Limpar</button>
+      </div>
+    </div>
+
+    <!-- QUESTIONS LIST -->
+    <div>
+      <div class="section-title">📋 Banco de Questões</div>
+      <div class="q-list" id="q-list"></div>
+    </div>
+
+    <!-- PUBLICAR -->
+    <div>
+      <div class="section-title">🚀 Publicar Questões para os Alunos</div>
+      <div class="settings-box">
+
+        <div style="background:rgba(0,212,170,0.07);border:1px solid rgba(0,212,170,0.25);border-radius:10px;padding:16px 18px;margin-bottom:16px;">
+          <div style="font-family:var(--mono);font-size:.8rem;color:var(--accent);letter-spacing:1px;margin-bottom:8px;">⚡ SOLUÇÃO PRINCIPAL</div>
+          <div class="settings-hint" style="font-size:.88rem;line-height:1.9;margin-bottom:14px;">
+            As questões salvas aqui <strong style="color:var(--text);">não chegam automaticamente</strong> ao celular dos alunos — cada navegador tem seu próprio armazenamento.<br><br>
+            A solução é simples: clique em <strong style="color:var(--accent);">Gerar HTML com questões</strong>. Isso gera um novo <code>index.html</code> com suas questões <strong style="color:var(--text);">já embutidas dentro do arquivo</strong>. Suba esse arquivo no GitHub e todos os alunos receberão as questões automaticamente ao abrir o site.
+          </div>
+          <button class="btn btn-primary" onclick="exportHTMLWithQuestions()" style="width:100%;">
+            ⬇ Gerar index.html com questões
+          </button>
+          <div class="settings-hint" style="margin-top:10px;line-height:1.8;">
+            <strong style="color:var(--text2);">Após baixar:</strong> vá no seu repositório GitHub → clique no arquivo <code>index.html</code> → "..." → <em>Upload file</em> → substitua pelo novo arquivo → <em>Commit changes</em>.
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Opções alternativas dobráveis -->
+        <div>
+          <button onclick="toggleAltSync()" style="background:none;border:none;color:var(--text2);font-family:var(--mono);font-size:.78rem;letter-spacing:1px;cursor:pointer;padding:4px 0;">
+            ▸ Outras opções (código / JSON)
+          </button>
+          <div id="alt-sync-body" style="display:none;margin-top:14px;">
+
+            <div class="sync-tab-row">
+              <button class="sync-tab active" id="stab-code"  onclick="switchSyncTab('code')">📋 Código</button>
+              <button class="sync-tab"        id="stab-json"  onclick="switchSyncTab('json')">📁 JSON</button>
+              <button class="sync-tab"        id="stab-paste" onclick="switchSyncTab('paste')">⬆ Importar</button>
+            </div>
+
+            <!-- TAB: CÓDIGO -->
+            <div id="sync-tab-code">
+              <div class="settings-hint" style="margin-bottom:10px;">
+                Gere um código, copie e envie para si mesmo. No celular, abra o painel → aba Importar → cole.
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="generateCode()" style="margin-bottom:12px;">🔑 Gerar Código</button>
+              <div id="sync-code-out" style="display:none;">
+                <div class="sync-code-box" id="sync-code-text" onclick="selectCode()"></div>
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                  <button class="btn btn-outline btn-sm" onclick="copyCode()">📋 Copiar</button>
+                  <span id="copy-confirm" style="font-family:var(--mono);font-size:.75rem;color:var(--accent);align-self:center;display:none;">✓ Copiado!</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB: JSON -->
+            <div id="sync-tab-json" style="display:none;">
+              <div class="settings-hint" style="margin-bottom:10px;">
+                <strong style="color:var(--text2);">PC:</strong> clique em Baixar. &nbsp; <strong style="color:var(--text2);">Celular:</strong> clique em Mostrar, copie tudo, cole na aba Importar.
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                <button class="btn btn-outline btn-sm" onclick="exportJSONDownload()">⬇ Baixar .json</button>
+                <button class="btn btn-outline btn-sm" onclick="exportJSONShow()">👁 Mostrar JSON</button>
+              </div>
+              <div id="json-show-box" style="display:none;">
+                <textarea id="json-show-text" rows="5" readonly style="font-family:var(--mono);font-size:.72rem;background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:10px;color:var(--accent2);width:100%;resize:none;"></textarea>
+                <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="copyJSONText()">📋 Copiar tudo</button>
+              </div>
+            </div>
+
+            <!-- TAB: IMPORTAR -->
+            <div id="sync-tab-paste" style="display:none;">
+              <div class="settings-hint" style="margin-bottom:10px;">Cole o código ou JSON, ou selecione um arquivo.</div>
+              <div class="field" style="margin-bottom:12px;">
+                <label>Cole aqui</label>
+                <textarea id="paste-code-area" rows="4" placeholder="Cole o código ou JSON..." style="font-family:var(--mono);font-size:.78rem;"></textarea>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button class="btn btn-primary btn-sm" onclick="importFromPaste()">✓ Importar</button>
+                <span style="font-family:var(--mono);font-size:.8rem;color:var(--text3);">ou</span>
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('import-json-input').click()">📁 Arquivo</button>
+              </div>
+              <input type="file" id="import-json-input" accept=".json,application/json,text/plain,*/*" style="display:none" onchange="importJSON(event)">
+            </div>
+
+          </div><!-- /alt-sync-body -->
+        </div>
+
+      </div>
+    </div>
+
+    <!-- APPS SCRIPT INSTRUCTIONS -->
+    <div>
+      <div class="section-title">📄 Instruções — Google Sheets</div>
+      <div class="settings-box">
+        <div class="settings-hint" style="font-size:.82rem;line-height:1.8;">
+          <strong style="color:var(--text2);">Passo 1:</strong> Crie uma planilha no Google Sheets com as colunas:<br>
+          <code style="color:var(--accent);">Timestamp | Nome | Matrícula | Acertos | Total | Aproveitamento% | Score (velocidade)</code><br><br>
+          <strong style="color:var(--text2);">Passo 2:</strong> No menu <em>Extensões → Apps Script</em>, cole o código abaixo:<br>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:var(--mono);font-size:.75rem;color:var(--accent2);line-height:1.6;overflow-x:auto;white-space:pre;">function doPost(e) {
+  var sheet = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    new Date().toLocaleString('pt-BR'),
+    data.name,
+    data.classe,
+    data.correct,
+    data.total,
+    data.pct,
+    data.score
+  ]);
+  return ContentService
+    .createTextOutput('OK')
+    .setMimeType(ContentService.MimeType.TEXT);
+}</div>
+        <div class="settings-hint" style="font-size:.82rem;line-height:1.8;margin-top:4px;">
+          <strong style="color:var(--text2);">Passo 3:</strong> Clique em <em>Implantar → Nova implantação</em>.<br>
+          Tipo: <strong>App da Web</strong> | Executar como: <strong>Eu</strong> | Quem tem acesso: <strong>Qualquer pessoa</strong>.<br>
+          <strong style="color:var(--text2);">Passo 4:</strong> Copie a URL gerada e cole no campo acima.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL SYNC IMPORT -->
+<div class="modal-bg" id="modal-sync">
+  <div class="modal" style="max-width:420px;text-align:center;">
+    <div style="font-size:48px;margin-bottom:12px;">📲</div>
+    <div class="modal-title">Questões Detectadas</div>
+    <p style="color:var(--text2);font-size:.95rem;line-height:1.6;margin-bottom:8px;">
+      Este link contém um banco de questões.<br>
+      Deseja importar <strong id="sync-q-count" style="color:var(--accent)">0</strong> questões?
+    </p>
+    <p style="font-family:var(--mono);font-size:.75rem;color:var(--accent3);margin-bottom:24px;">
+      ⚠ Isso substituirá as questões atuais neste dispositivo.
+    </p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" style="flex:1" onclick="confirmSyncImport()">✓ Importar</button>
+      <button class="btn btn-outline" onclick="cancelSyncImport()">Ignorar</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOCKOUT OVERLAY -->
+<div id="lockout-overlay">
+  <div class="lockout-icon">🚫</div>
+  <div class="lockout-title">SAÍDA DETECTADA</div>
+  <div class="lockout-msg" id="lockout-msg">
+    Você tentou sair da avaliação. Esta tentativa foi registrada.<br>
+    Retornando em <strong id="lockout-countdown">5</strong> segundos...
+  </div>
+</div>
+
+<!-- MODAL ADD/EDIT QUESTION -->
+<div class="modal-bg" id="modal-q">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">➕ Nova Questão</div>
+
+    <div class="field">
+      <label>Enunciado da questão</label>
+      <textarea id="m-text" rows="3" placeholder="Identifique a estrutura destacada na imagem acima..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Categoria</label>
+      <select id="m-category">
+        <option value="Citopatologia">Citopatologia</option>
+        <option value="Hematologia">Hematologia</option>
+        <option value="Parasitologia">Parasitologia</option>
+        <option value="Bacteriologia">Bacteriologia</option>
+        <option value="Micologia">Micologia</option>
+        <option value="Virologia">Virologia</option>
+        <option value="Bioquímica">Bioquímica</option>
+        <option value="Geral">Geral</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Mídia (imagem ou vídeo)</label>
+      <div class="media-type-row">
+        <button class="media-type-btn active" id="mtype-image" onclick="setMediaType('image')">🖼 Imagem</button>
+        <button class="media-type-btn" id="mtype-video" onclick="setMediaType('video')">🎬 Vídeo</button>
+        <button class="media-type-btn" id="mtype-none" onclick="setMediaType('none')">✕ Sem mídia</button>
+      </div>
+      <input type="url" id="m-media-url" placeholder="https://... (URL da imagem ou vídeo)">
+    </div>
+
+    <div class="field">
+      <label>Alternativas <span style="color:var(--text3);font-size:.8em;">(marque a correta →)</span></label>
+      <div class="options-edit" id="options-edit"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:24px;">
+      <button class="btn btn-primary" style="flex:1" onclick="saveQuestion()">💾 Salvar</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════ SCRIPT ═══════════════════════ -->
+<script>
+// ── STATE ──────────────────────────────────────────────
+const TEACHER_PASS = 'Besa190918';
+const LETTERS = ['A','B','C','D','E'];
+
+let state = {
+  studentName: '',
+  studentClass: '',
+  questions: [],
+  currentQ: 0,
+  answers: [],
+  startTimes: [],
+  timeLimit: 30,
+  timerInterval: null,
+  timerLeft: 30,
+  quizActive: false,
+  violations: 0,
+  editingId: null,
+  mediaType: 'image',
+  settings: {},
+};
+
+// ── STORAGE ────────────────────────────────────────────
+function save(key, val) { localStorage.setItem('ql_'+key, JSON.stringify(val)); }
+function load(key, def) {
+  try { const v=localStorage.getItem('ql_'+key); return v ? JSON.parse(v) : def; }
+  catch(e){ return def; }
+}
+
+function loadAll() {
+  state.questions = load('questions', getSampleQuestions());
+  state.settings  = load('settings', { sheetsUrl:'', timePerQ:30 });
+}
+
+function saveQuestions() { save('questions', state.questions); }
+function saveSettings() {
+  const url = document.getElementById('sheets-url').value.trim();
+  const t   = parseInt(document.getElementById('time-per-q').value) || 30;
+  state.settings = { sheetsUrl: url, timePerQ: Math.max(5, Math.min(120, t)) };
+  save('settings', state.settings);
+  toast('Configurações salvas!', 'success');
+}
+
+// ── SAMPLE QUESTIONS ───────────────────────────────────
+function getSampleQuestions() {
+  return [
+    {
+      id: uid(), text: 'Observe a imagem. Qual tipo celular está indicado pela seta?',
+      category: 'Hematologia',
+      media: { type: 'image', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Neutrophil_with_anthrax_crop.jpg/320px-Neutrophil_with_anthrax_crop.jpg' },
+      options: ['Eritrócito','Neutrófilo','Linfócito','Monócito','Eosinófilo'],
+      correct: 1
+    },
+    {
+      id: uid(), text: 'Qual parasita está representado na imagem abaixo?',
+      category: 'Parasitologia',
+      media: { type: 'none', url: '' },
+      options: ['Plasmodium vivax','Toxoplasma gondii','Leishmania spp.','Trypanosoma cruzi','Entamoeba histolytica'],
+      correct: 3
+    }
+  ];
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ── SCREEN NAVIGATION ──────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToName() {
+  if (state.questions.length === 0) { toast('Nenhuma questão cadastrada!', 'error'); return; }
+  showScreen('screen-name');
+  setTimeout(() => document.getElementById('student-name').focus(), 300);
+}
+
+// ── QUIZ START ─────────────────────────────────────────
+function startQuiz() {
+  const name = document.getElementById('student-name').value.trim();
+  const cls  = document.getElementById('student-class').value.trim();
+  if (!name) { document.getElementById('student-name').classList.add('shake'); setTimeout(()=>document.getElementById('student-name').classList.remove('shake'),500); toast('Digite seu nome!', 'error'); return; }
+
+  state.studentName  = name;
+  state.studentClass = cls;
+  state.currentQ     = 0;
+  state.answers      = [];
+  state.startTimes   = [];
+  state.violations   = 0;
+  state.timeLimit    = state.settings.timePerQ || 30;
+  state.quizActive   = true;
+
+  showScreen('screen-quiz');
+  requestFullscreen();
+  lockAntiCheat();
+  renderQuestion();
+}
+
+// ── RENDER QUESTION ────────────────────────────────────
+function renderQuestion() {
+  const q = state.questions[state.currentQ];
+  const total = state.questions.length;
+
+  document.getElementById('q-current').textContent = state.currentQ + 1;
+  document.getElementById('q-total').textContent   = total;
+  document.getElementById('q-category').textContent = q.category || 'Geral';
+  document.getElementById('q-text').textContent    = q.text;
+
+  // Progress
+  document.getElementById('progress-bar').style.width = ((state.currentQ / total) * 100) + '%';
+
+  // Media
+  const box = document.getElementById('media-box');
+  box.innerHTML = '';
+  if (q.media && q.media.url && q.media.type !== 'none') {
+    if (q.media.type === 'image') {
+      const img = document.createElement('img');
+      img.src = q.media.url;
+      img.alt = 'Imagem da questão';
+      box.appendChild(img);
+    } else if (q.media.type === 'video') {
+      const vid = document.createElement('video');
+      vid.src = q.media.url;
+      vid.controls = true;
+      vid.controlsList = 'nodownload';
+      vid.oncontextmenu = e => e.preventDefault();
+      box.appendChild(vid);
+    }
+    box.style.minHeight = '200px';
+  } else {
+    box.innerHTML = '<span class="no-media">SEM MÍDIA</span>';
+    box.style.minHeight = '80px';
+  }
+
+  // Options
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    grid.appendChild(btn);
+  });
+
+  // Timer
+  startTimer();
+  state.startTimes[state.currentQ] = Date.now();
+}
+
+// ── TIMER ──────────────────────────────────────────────
+function startTimer() {
+  clearInterval(state.timerInterval);
+  state.timerLeft = state.timeLimit;
+  updateTimerUI();
+
+  state.timerInterval = setInterval(() => {
+    state.timerLeft--;
+    updateTimerUI();
+    if (state.timerLeft <= 0) {
+      clearInterval(state.timerInterval);
+      timeUp();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const circ = document.getElementById('timer-circle');
+  const num  = document.getElementById('timer-num');
+  const pct  = state.timerLeft / state.timeLimit;
+  const dash = 132;
+  circ.style.strokeDashoffset = dash * (1 - pct);
+  num.textContent = state.timerLeft;
+
+  // Color shift
+  if (pct > 0.5) {
+    circ.style.stroke = 'var(--accent)';
+    num.style.color   = 'var(--accent)';
+  } else if (pct > 0.25) {
+    circ.style.stroke = 'var(--accent4)';
+    num.style.color   = 'var(--accent4)';
+  } else {
+    circ.style.stroke = 'var(--accent3)';
+    num.style.color   = 'var(--accent3)';
+  }
+}
+
+function timeUp() {
+  // Record as unanswered (-1) with full time used
+  recordAnswer(-1);
+}
+
+// ── SELECT ANSWER ──────────────────────────────────────
+function selectAnswer(idx) {
+  clearInterval(state.timerInterval);
+  const elapsed = (Date.now() - state.startTimes[state.currentQ]) / 1000;
+  recordAnswer(idx, elapsed);
+}
+
+function recordAnswer(idx, elapsed) {
+  const q = state.questions[state.currentQ];
+  const timeUsed = elapsed !== undefined ? elapsed : state.timeLimit;
+  const correct  = idx === q.correct;
+
+  // Score calculation: base=100, bonus for speed
+  const speedBonus = correct ? Math.max(0, Math.round((1 - timeUsed / state.timeLimit) * 50)) : 0;
+  const points     = correct ? 100 + speedBonus : 0;
+
+  state.answers.push({ idx, correct, timeUsed, points });
+
+  // Visual feedback
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === q.correct) b.classList.add('correct');
+    if (i === idx && idx !== q.correct) b.classList.add('wrong');
+  });
+
+  // Next question after delay
+  setTimeout(() => {
+    state.currentQ++;
+    if (state.currentQ < state.questions.length) {
+      renderQuestion();
+    } else {
+      endQuiz();
+    }
+  }, 1000);
+}
+
+// ── END QUIZ ───────────────────────────────────────────
+function endQuiz() {
+  state.quizActive = false;
+  clearInterval(state.timerInterval);
+  exitFullscreen();
+  unlockAntiCheat();
+
+  const total   = state.questions.length;
+  const correct = state.answers.filter(a => a.correct).length;
+  const score   = state.answers.reduce((s,a) => s + a.points, 0);
+  const pct     = Math.round((correct / total) * 100);
+
+  // Progress bar complete
+  document.getElementById('progress-bar').style.width = '100%';
+
+  // Title
+  let title = 'EXCELENTE!', sub = 'Desempenho acima da média!';
+  if (pct < 50)  { title='CONTINUE ESTUDANDO'; sub='Revise o conteúdo e tente novamente.'; }
+  else if (pct < 70) { title='BOM!'; sub='Está no caminho certo. Continue praticando!'; }
+  else if (pct < 90) { title='MUITO BOM!'; sub='Ótimo desempenho na avaliação!'; }
+
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-sub').textContent   = sub;
+  document.getElementById('stat-correct').textContent  = correct;
+  document.getElementById('stat-wrong').textContent    = total - correct;
+  document.getElementById('stat-pct').textContent      = pct + '%';
+
+  showScreen('screen-results');
+
+  // Animate score
+  setTimeout(() => {
+    const ring = document.getElementById('results-ring');
+    const circumference = 2 * Math.PI * 70;
+    ring.style.strokeDasharray = circumference;
+    ring.style.strokeDashoffset= circumference * (1 - pct/100);
+
+    animateNum(document.getElementById('final-score'), 0, score, 1200);
+  }, 200);
+
+  // Save local result
+  const result = {
+    name: state.studentName,
+    classe: state.studentClass,
+    correct, total, pct, score,
+    violations: state.violations,
+    ts: new Date().toLocaleString('pt-BR')
+  };
+  const local = load('results', []);
+  local.push(result);
+  save('results', local);
+
+  // Send to Google Sheets
+  sendToSheets(result);
+}
+
+function animateNum(el, from, to, dur) {
+  const start = performance.now();
+  function update(now) {
+    const t = Math.min((now - start) / dur, 1);
+    el.textContent = Math.round(from + (to - from) * easeOut(t));
+    if (t < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function easeOut(t) { return 1 - Math.pow(1-t, 3); }
+
+// ── SEND TO SHEETS ─────────────────────────────────────
+async function sendToSheets(result) {
+  const url = state.settings.sheetsUrl;
+  const ind = document.getElementById('sending-indicator');
+  const sta = document.getElementById('send-status');
+
+  if (!url) {
+    ind.style.display = 'none';
+    sta.innerHTML = '<span class="tag-error">Webhook não configurado (resultados salvos localmente)</span>';
+    return;
+  }
+
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(result)
+    });
+    ind.style.display = 'none';
+    sta.innerHTML = '<span class="tag-success">✓ Resultado enviado ao Google Sheets</span>';
+  } catch(e) {
+    ind.style.display = 'none';
+    sta.innerHTML = '<span class="tag-error">Falha no envio. Resultado salvo localmente.</span>';
+  }
+}
+
+// ── ANTI-CHEAT ─────────────────────────────────────────
+function lockAntiCheat() {
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('blur', onWindowBlur);
+  document.addEventListener('contextmenu', blockCtx);
+  document.addEventListener('keydown', blockKeys);
+}
+
+function unlockAntiCheat() {
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  window.removeEventListener('blur', onWindowBlur);
+  document.removeEventListener('contextmenu', blockCtx);
+  document.removeEventListener('keydown', blockKeys);
+}
+
+function blockCtx(e) { if(state.quizActive) e.preventDefault(); }
+
+function blockKeys(e) {
+  if (!state.quizActive) return;
+  const blocked = [
+    e.key === 'F12',
+    e.ctrlKey && ['c','v','u','s','a','p','f'].includes(e.key.toLowerCase()),
+    e.altKey && e.key === 'Tab',
+    e.key === 'F5',
+    e.ctrlKey && e.key === 'r',
+  ];
+  if (blocked.some(Boolean)) e.preventDefault();
+}
+
+function onVisibilityChange() {
+  if (!state.quizActive) return;
+  if (document.hidden) triggerLockout('Você saiu da aba ou minimizou o navegador.');
+}
+
+function onWindowBlur() {
+  if (!state.quizActive) return;
+  // Slight delay to avoid false positives (e.g. from fullscreen prompt)
+  setTimeout(() => {
+    if (!state.quizActive) return;
+    if (!document.hasFocus()) triggerLockout('Outra janela foi ativada.');
+  }, 300);
+}
+
+function triggerLockout(reason) {
+  state.violations++;
+  const overlay = document.getElementById('lockout-overlay');
+  const msg     = document.getElementById('lockout-msg');
+  let count = 5;
+  msg.innerHTML = `Você saiu da avaliação: <em>${reason}</em><br>Esta tentativa foi registrada (${state.violations}x).<br>Retornando em <strong id="lockout-countdown">${count}</strong> segundos...`;
+  overlay.classList.add('show');
+
+  const cd = setInterval(() => {
+    count--;
+    const el = document.getElementById('lockout-countdown');
+    if (el) el.textContent = count;
+    if (count <= 0) {
+      clearInterval(cd);
+      overlay.classList.remove('show');
+      requestFullscreen();
+    }
+  }, 1000);
+}
+
+// ── FULLSCREEN ─────────────────────────────────────────
+function requestFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+
+function exitFullscreen() {
+  if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+  else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+}
+
+// ── TEACHER LOGIN ──────────────────────────────────────
+function teacherLogin() {
+  const pw = document.getElementById('teacher-password').value;
+  if (pw === TEACHER_PASS) {
+    document.getElementById('teacher-password').value = '';
+    showScreen('screen-teacher');
+    loadTeacherPanel();
+  } else {
+    document.getElementById('teacher-password').classList.add('shake');
+    setTimeout(() => document.getElementById('teacher-password').classList.remove('shake'), 500);
+    toast('Senha incorreta!', 'error');
+  }
+}
+
+// ── TEACHER PANEL ──────────────────────────────────────
+function loadTeacherPanel() {
+  document.getElementById('sheets-url').value   = state.settings.sheetsUrl || '';
+  document.getElementById('time-per-q').value   = state.settings.timePerQ || 30;
+  renderQList();
+  renderLocalResults();
+}
+
+function renderQList() {
+  const list = document.getElementById('q-list');
+  if (state.questions.length === 0) {
+    list.innerHTML = '<div class="empty-state">Nenhuma questão cadastrada</div>';
+    return;
+  }
+  list.innerHTML = '';
+  state.questions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'q-item';
+    div.innerHTML = `
+      <div class="q-item-num">${i+1}</div>
+      <div class="q-item-content">
+        <div class="q-item-text">${escHtml(q.text)}</div>
+        <div class="q-item-meta">${q.category} | ${q.media?.type !== 'none' && q.media?.url ? '📎 Mídia' : 'Sem mídia'} | Correta: <span style="color:var(--accent)">${LETTERS[q.correct]}</span></div>
+      </div>
+      <div class="q-item-actions">
+        <button class="btn-icon" onclick="openEditModal('${q.id}')" title="Editar">✏</button>
+        <button class="btn-icon del" onclick="deleteQ('${q.id}')" title="Excluir">🗑</button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function renderLocalResults() {
+  const results = load('results', []);
+  const cont = document.getElementById('local-results-list');
+  if (results.length === 0) {
+    cont.innerHTML = '<div class="empty-state">Nenhum resultado local registrado</div>';
+    return;
+  }
+  cont.innerHTML = '<div class="results-list">' +
+    results.slice().reverse().map(r => `
+      <div class="result-row">
+        <div class="result-name">${escHtml(r.name)}${r.classe ? ' · '+escHtml(r.classe):''}</div>
+        <div class="result-correct">${r.correct}/${r.total}</div>
+        <div class="result-score">${r.score}pts</div>
+        <div class="result-time">${r.ts}</div>
+      </div>`).join('') + '</div>';
+}
+
+function clearLocalResults() {
+  if (!confirm('Limpar todos os resultados locais?')) return;
+  save('results', []);
+  renderLocalResults();
+  toast('Resultados locais apagados.', 'success');
+}
+
+function exportCSV() {
+  const results = load('results', []);
+  if (results.length === 0) { toast('Sem resultados para exportar.', 'error'); return; }
+  const rows = [
+    ['Timestamp','Nome','Turma','Acertos','Total','Aproveitamento%','Score','Violações'],
+    ...results.map(r => [r.ts, r.name, r.classe, r.correct, r.total, r.pct, r.score, r.violations||0])
+  ];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'quizlab_resultados.csv';
+  a.click();
+}
+
+// ── MODAL QUESTION ─────────────────────────────────────
+function openAddModal() {
+  state.editingId = null;
+  document.getElementById('modal-title').textContent = '➕ Nova Questão';
+  document.getElementById('m-text').value = '';
+  document.getElementById('m-category').value = 'Hematologia';
+  document.getElementById('m-media-url').value = '';
+  setMediaType('image');
+  renderOptionsEdit(['','','','',''], 0);
+  document.getElementById('modal-q').classList.add('show');
+}
+
+function openEditModal(id) {
+  const q = state.questions.find(x => x.id === id);
+  if (!q) return;
+  state.editingId = id;
+  document.getElementById('modal-title').textContent = '✏ Editar Questão';
+  document.getElementById('m-text').value     = q.text;
+  document.getElementById('m-category').value = q.category || 'Geral';
+  document.getElementById('m-media-url').value = q.media?.url || '';
+  setMediaType(q.media?.type || 'none');
+  renderOptionsEdit(q.options, q.correct);
+  document.getElementById('modal-q').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modal-q').classList.remove('show'); }
+
+function setMediaType(type) {
+  state.mediaType = type;
+  ['image','video','none'].forEach(t => {
+    document.getElementById('mtype-'+t).classList.toggle('active', t===type);
+  });
+  document.getElementById('m-media-url').style.display = type === 'none' ? 'none' : 'block';
+}
+
+function renderOptionsEdit(opts, correct) {
+  const cont = document.getElementById('options-edit');
+  cont.innerHTML = '';
+  opts.forEach((opt, i) => {
+    const row = document.createElement('div');
+    row.className = 'option-edit-row';
+    row.innerHTML = `
+      <div class="opt-badge ${i===correct?'correct-opt':''}" id="obadge-${i}">${LETTERS[i]}</div>
+      <input type="text" placeholder="Alternativa ${LETTERS[i]}" value="${escHtml(opt)}" id="opt-${i}">
+      <input type="radio" name="correct-opt" class="radio-correct" value="${i}" ${i===correct?'checked':''} onchange="updateBadges()">
+    `;
+    cont.appendChild(row);
+  });
+}
+
+function updateBadges() {
+  const val = parseInt(document.querySelector('input[name="correct-opt"]:checked')?.value ?? 0);
+  LETTERS.forEach((_,i) => {
+    const b = document.getElementById('obadge-'+i);
+    if(b) b.className = 'opt-badge' + (i===val?' correct-opt':'');
+  });
+}
+
+function saveQuestion() {
+  const text = document.getElementById('m-text').value.trim();
+  if (!text) { toast('Digite o enunciado!', 'error'); return; }
+
+  const opts = LETTERS.map((_,i) => document.getElementById('opt-'+i)?.value.trim() || '');
+  if (opts.some(o => !o)) { toast('Preencha todas as alternativas!', 'error'); return; }
+
+  const correct = parseInt(document.querySelector('input[name="correct-opt"]:checked')?.value ?? 0);
+  const q = {
+    id: state.editingId || uid(),
+    text,
+    category: document.getElementById('m-category').value,
+    media: {
+      type: state.mediaType,
+      url:  document.getElementById('m-media-url').value.trim()
+    },
+    options: opts,
+    correct
+  };
+
+  if (state.editingId) {
+    const idx = state.questions.findIndex(x => x.id === state.editingId);
+    if (idx !== -1) state.questions[idx] = q;
+  } else {
+    state.questions.push(q);
+  }
+
+  saveQuestions();
+  renderQList();
+  closeModal();
+  toast(state.editingId ? 'Questão atualizada!' : 'Questão adicionada!', 'success');
+}
+
+function deleteQ(id) {
+  if (!confirm('Excluir esta questão?')) return;
+  state.questions = state.questions.filter(q => q.id !== id);
+  saveQuestions();
+  renderQList();
+  toast('Questão excluída.', 'success');
+}
+
+// ── TOAST ──────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+// ── UTILS ──────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modal on bg click
+document.getElementById('modal-q').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.getElementById('modal-sync').addEventListener('click', function(e) {
+  if (e.target === this) cancelSyncImport();
+});
+
+// ── SYNC — ABAS ────────────────────────────────────────
+function switchSyncTab(tab) {
+  ['code','json','paste'].forEach(t => {
+    document.getElementById('stab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('sync-tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+}
+
+// ── SYNC — GERAR CÓDIGO ────────────────────────────────
+function generateCode() {
+  if (state.questions.length === 0) { toast('Nenhuma questão cadastrada!', 'error'); return; }
+  try {
+    const payload = { questions: state.questions, settings: { timePerQ: state.settings.timePerQ } };
+    const code    = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    document.getElementById('sync-code-text').textContent = code;
+    document.getElementById('sync-code-out').style.display = 'block';
+    document.getElementById('copy-confirm').style.display  = 'none';
+  } catch(e) {
+    toast('Erro ao gerar código.', 'error');
+  }
+}
+
+function selectCode() {
+  const el = document.getElementById('sync-code-text');
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+}
+
+function copyCode() {
+  const code = document.getElementById('sync-code-text').textContent;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(showCopied).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = code; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showCopied();
+  });
+}
+
+function showCopied() {
+  const el = document.getElementById('copy-confirm');
+  el.style.display = 'inline';
+  setTimeout(() => el.style.display = 'none', 2500);
+  toast('Código copiado! Cole no celular.', 'success');
+}
+
+// ── SYNC — IMPORTAR CÓDIGO ─────────────────────────────
+function importFromCode() {
+  const raw = document.getElementById('paste-code-area').value.trim();
+  if (!raw) { toast('Cole o código primeiro!', 'error'); return; }
+  try {
+    const json = decodeURIComponent(escape(atob(raw)));
+    const data = JSON.parse(json);
+    if (!data.questions || !Array.isArray(data.questions) || data.questions.length === 0)
+      throw new Error('sem questões');
+    applyImport(data, 'código');
+  } catch(e) {
+    toast('Código inválido ou corrompido. Verifique se copiou tudo.', 'error');
+  }
+}
+
+function applyImport(data, origem) {
+  if (!confirm(`Importar ${data.questions.length} questão(ões) via ${origem}?\nAs questões atuais serão substituídas.`)) return;
+  state.questions = data.questions;
+  saveQuestions();
+  if (data.settings) {
+    const local = load('settings', {});
+    state.settings = Object.assign({}, local, { timePerQ: data.settings.timePerQ || local.timePerQ || 30 });
+    save('settings', state.settings);
+  }
+  renderQList();
+  document.getElementById('paste-code-area').value = '';
+  toast(`✓ ${state.questions.length} questões importadas!`, 'success');
+}
+
+// ── SYNC — JSON ARQUIVO ────────────────────────────────
+function exportJSONDownload() {
+  if (state.questions.length === 0) { toast('Nenhuma questão para exportar!', 'error'); return; }
+  const json = JSON.stringify({ questions: state.questions, settings: { timePerQ: state.settings.timePerQ }, exportedAt: new Date().toISOString() }, null, 2);
+  try {
+    // Tenta download direto (PC / Android Chrome)
+    const blob = new Blob([json], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'quizlab_questoes.json';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Arquivo baixado!', 'success');
+  } catch(e) {
+    // Fallback: abre como data URI
+    window.open('data:application/json;charset=utf-8,' + encodeURIComponent(json), '_blank');
+    toast('Abrindo arquivo — salve manualmente.', 'success');
+  }
+}
+
+function exportJSONShow() {
+  if (state.questions.length === 0) { toast('Nenhuma questão para exportar!', 'error'); return; }
+  const json = JSON.stringify({ questions: state.questions, settings: { timePerQ: state.settings.timePerQ }, exportedAt: new Date().toISOString() });
+  document.getElementById('json-show-text').value = json;
+  document.getElementById('json-show-box').style.display = 'block';
+  toast('JSON gerado. Copie e cole na aba Importar.', 'success');
+}
+
+function copyJSONText() {
+  const ta = document.getElementById('json-show-text');
+  ta.select(); ta.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(ta.value).then(() => {
+    toast('JSON copiado! Cole na aba Importar.', 'success');
+  }).catch(() => {
+    document.execCommand('copy');
+    toast('JSON copiado!', 'success');
+  });
+}
+
+// exportJSON mantido como alias para compatibilidade
+function exportJSON() { exportJSONDownload(); }
+
+function importFromPaste() {
+  const raw = document.getElementById('paste-code-area').value.trim();
+  if (!raw) { toast('Cole o código ou JSON primeiro!', 'error'); return; }
+
+  // Tenta como JSON direto primeiro
+  try {
+    const data = JSON.parse(raw);
+    if (data.questions && Array.isArray(data.questions)) {
+      applyImport(data, 'JSON');
+      return;
+    }
+  } catch(e) { /* não é JSON direto, tenta base64 */ }
+
+  // Tenta como código base64
+  try {
+    const json = decodeURIComponent(escape(atob(raw)));
+    const data = JSON.parse(json);
+    if (!data.questions || !Array.isArray(data.questions) || data.questions.length === 0)
+      throw new Error('sem questões');
+    applyImport(data, 'código');
+  } catch(e) {
+    toast('Conteúdo inválido. Verifique se copiou tudo corretamente.', 'error');
+  }
+}
+
+// alias antigo
+function importFromCode() { importFromPaste(); }
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.questions || !Array.isArray(data.questions)) throw new Error('inválido');
+      applyImport(data, 'arquivo JSON');
+    } catch(err) {
+      toast('Arquivo inválido ou corrompido.', 'error');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── SYNC — HASH DA URL (fallback) ──────────────────────
+let _pendingSyncData = null;
+
+function checkUrlHash() {
+  const hash = window.location.hash;
+  if (!hash.startsWith('#q=')) return;
+  try {
+    const json = decodeURIComponent(escape(atob(hash.slice(3))));
+    const data = JSON.parse(json);
+    if (!data.questions || !Array.isArray(data.questions) || data.questions.length === 0) return;
+    _pendingSyncData = data;
+    document.getElementById('sync-q-count').textContent = data.questions.length;
+    document.getElementById('modal-sync').classList.add('show');
+  } catch(e) { /* hash inválido */ }
+}
+
+function confirmSyncImport() {
+  if (!_pendingSyncData) return;
+  applyImport(_pendingSyncData, 'link');
+  _pendingSyncData = null;
+  document.getElementById('modal-sync').classList.remove('show');
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+
+function cancelSyncImport() {
+  _pendingSyncData = null;
+  document.getElementById('modal-sync').classList.remove('show');
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+
+// ── EXPORTAR HTML COM QUESTÕES EMBUTIDAS ──────────────
+function exportHTMLWithQuestions() {
+  if (state.questions.length === 0) { toast('Nenhuma questão cadastrada!', 'error'); return; }
+
+  const html = document.documentElement.outerHTML;
+  const questionsJSON = JSON.stringify(state.questions);
+  const settingsJSON  = JSON.stringify(state.settings);
+
+  let newHTML = html
+    // Embute as questões na função de carregamento
+    .replace(
+      /function getSampleQuestions\(\)\s*\{[\s\S]*?\n\}/,
+      `function getSampleQuestions() {\n  return ${questionsJSON};\n}`
+    )
+    .replace(
+      /function loadAll\(\)\s*\{[\s\S]*?\n\}/,
+      `function loadAll() {\n  const embedded = ${questionsJSON};\n  const saved = load('questions', null);\n  state.questions = (saved && saved.length > 0) ? saved : embedded;\n  state.settings  = load('settings', ${settingsJSON});\n}`
+    )
+    // Garante que só a tela inicial tem a classe "active"
+    .replace(/(<div class="screen)[^"]*(" id="screen-)/g, '$1$2')
+    .replace(/(<div class="screen" id="screen-landing")/, '$1 active');
+
+  const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast(`✓ index.html gerado com ${state.questions.length} questões!`, 'success');
+}
+
+function toggleAltSync() {
+  const body = document.getElementById('alt-sync-body');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+}
+
+// ── INIT ───────────────────────────────────────────────
+loadAll();
+checkUrlHash();
+</script>
+</body>
+</html>
