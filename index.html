@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quiz — Morfologia Humana e Processos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0e1a;
+  --surface:#111827;
+  --surface2:#1a2235;
+  --border:#ffffff12;
+  --border2:#ffffff22;
+  --accent:#3b82f6;
+  --accent2:#60a5fa;
+  --green:#22c55e;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --dim:#475569;
+  --r:12px;
+  --r2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Sora',sans-serif;
+  min-height:100vh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:2rem 1rem;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% -10%, #1e3a5f33, transparent),
+    radial-gradient(ellipse 60% 40% at 80% 110%, #0f2a4433, transparent);
+}
+#app{width:100%;max-width:680px}
+
+/* ── Screens ─────────────────────────────────── */
+.screen{display:none;animation:fadeUp .35s ease both}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Cards ───────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:2rem;
+  margin-bottom:1rem;
+}
+.card-sm{padding:1.25rem 1.5rem}
+
+/* ── Typography ──────────────────────────────── */
+.logo{
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  letter-spacing:.15em;
+  color:var(--accent2);
+  text-transform:uppercase;
+  margin-bottom:.75rem;
+  display:block;
+}
+h1{font-size:26px;font-weight:600;line-height:1.25;margin-bottom:.75rem;color:var(--text)}
+h2{font-size:20px;font-weight:500;margin-bottom:1rem;color:var(--text)}
+p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:.75rem}
+p:last-child{margin-bottom:0}
+
+/* ── Inputs ──────────────────────────────────── */
+label{display:block;font-size:12px;letter-spacing:.06em;color:var(--dim);text-transform:uppercase;margin-bottom:.4rem}
+input{
+  width:100%;
+  padding:.7rem 1rem;
+  font-size:15px;
+  font-family:'Sora',sans-serif;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:var(--r2);
+  color:var(--text);
+  margin-bottom:1rem;
+  outline:none;
+  transition:border-color .2s;
+}
+input:focus{border-color:var(--accent)}
+input::placeholder{color:var(--dim)}
+
+/* ── Buttons ─────────────────────────────────── */
+.btn-row{display:flex;gap:.75rem;flex-wrap:wrap}
+button{
+  cursor:pointer;
+  padding:.65rem 1.4rem;
+  font-size:14px;
+  font-family:'Sora',sans-serif;
+  font-weight:500;
+  border-radius:var(--r2);
+  border:1px solid var(--border2);
+  background:transparent;
+  color:var(--muted);
+  transition:all .2s;
+}
+button:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.primary:hover{background:#2563eb;border-color:#2563eb}
+button.ghost-red{color:var(--red);border-color:#ef444430}
+button.ghost-red:hover{background:#ef444415}
+
+/* ── Quiz header ─────────────────────────────── */
+.quiz-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:.75rem;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+.pill{
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  padding:4px 12px;
+  border-radius:20px;
+  border:1px solid;
+}
+.pill-blue{background:#3b82f615;border-color:#3b82f640;color:var(--accent2)}
+.pill-green{background:#22c55e15;border-color:#22c55e40;color:var(--green)}
+.pill-amber{background:#f59e0b15;border-color:#f59e0b40;color:var(--amber)}
+
+/* ── Progress ────────────────────────────────── */
+.progress-track{height:3px;background:var(--border);border-radius:2px;margin-bottom:.5rem;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
+
+/* ── Timer ───────────────────────────────────── */
+.timer-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+.timer-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.timer-fill{height:100%;background:var(--green);border-radius:3px;transition:width .15s linear,background .3s}
+#timer-num{
+  font-family:'Space Mono',monospace;
+  font-size:16px;
+  font-weight:700;
+  min-width:28px;
+  text-align:right;
+  color:var(--text);
+}
+
+/* ── Question ────────────────────────────────── */
+.q-text{
+  font-size:16px;
+  font-weight:400;
+  color:var(--text);
+  line-height:1.65;
+  margin-bottom:1.25rem;
+}
+
+/* ── Options ─────────────────────────────────── */
+.opt{
+  display:flex;
+  align-items:center;
+  gap:.875rem;
+  width:100%;
+  text-align:left;
+  padding:.75rem 1rem;
+  margin-bottom:.5rem;
+  font-size:14px;
+  font-family:'Sora',sans-serif;
+  border-radius:var(--r2);
+  border:1px solid var(--border2);
+  background:var(--surface2);
+  color:var(--muted);
+  transition:all .18s;
+  cursor:pointer;
+}
+.opt:last-child{margin-bottom:0}
+.opt:hover:not(:disabled){
+  border-color:#3b82f660;
+  color:var(--text);
+  background:#1e3a5f44;
+}
+.opt:disabled{cursor:not-allowed}
+.opt-letter{
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  font-weight:700;
+  width:22px;height:22px;
+  border-radius:4px;
+  border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  color:var(--dim);
+  transition:all .18s;
+}
+.opt.correct{border-color:#22c55e70;background:#22c55e15;color:#86efac}
+.opt.correct .opt-letter{background:#22c55e;border-color:#22c55e;color:#fff}
+.opt.wrong{border-color:#ef444470;background:#ef444415;color:#fca5a5}
+.opt.wrong .opt-letter{background:#ef4444;border-color:#ef4444;color:#fff}
+
+/* ── Feedback ────────────────────────────────── */
+.fb{
+  padding:.75rem 1rem;
+  border-radius:var(--r2);
+  font-size:13px;
+  margin-top:.75rem;
+  display:none;
+  animation:fadeUp .25s ease;
+}
+.fb.ok{background:#22c55e18;border:1px solid #22c55e40;color:#86efac}
+.fb.ko{background:#ef444418;border:1px solid #ef444440;color:#fca5a5}
+
+/* ── Next button ─────────────────────────────── */
+#btn-next{
+  margin-top:1rem;
+  display:none;
+  float:right;
+}
+.clearfix::after{content:'';display:block;clear:both}
+
+/* ── End screen ──────────────────────────────── */
+.score-display{
+  text-align:center;
+  padding:1.5rem 0;
+}
+.score-num{
+  font-family:'Space Mono',monospace;
+  font-size:64px;
+  font-weight:700;
+  color:var(--accent2);
+  line-height:1;
+  display:block;
+}
+.score-label{font-size:13px;color:var(--dim);margin-top:.5rem;display:block;letter-spacing:.06em}
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:.75rem;
+  margin:1.25rem 0;
+}
+.stat{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--r2);
+  padding:.875rem;
+  text-align:center;
+}
+.stat-v{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--text)}
+.stat-l{font-size:11px;color:var(--dim);margin-top:.25rem;letter-spacing:.05em}
+
+/* ── Ranking ─────────────────────────────────── */
+.rank-item{
+  display:flex;
+  align-items:center;
+  gap:.875rem;
+  padding:.7rem 1rem;
+  border-radius:var(--r2);
+  margin-bottom:.4rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  transition:border-color .2s;
+}
+.rank-item:hover{border-color:var(--border2)}
+.rank-pos{
+  font-family:'Space Mono',monospace;
+  font-size:13px;
+  font-weight:700;
+  min-width:28px;
+  color:var(--dim);
+}
+.rank-pos.gold{color:#f59e0b}
+.rank-pos.silver{color:#94a3b8}
+.rank-pos.bronze{color:#a16207}
+.rank-name{flex:1;font-size:14px;font-weight:500;color:var(--text)}
+.rank-hits{font-size:12px;color:var(--dim)}
+.rank-score{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--accent2)}
+.rank-date{font-size:11px;color:var(--dim)}
+
+/* ── Divider ─────────────────────────────────── */
+.sep{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+
+/* ── Error ───────────────────────────────────── */
+.err{color:var(--red);font-size:12px;margin-top:.35rem}
+
+/* ── Responsive ──────────────────────────────── */
+@media(max-width:480px){
+  .card{padding:1.25rem}
+  h1{font-size:22px}
+  .score-num{font-size:48px}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
+  .stat-v{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- START -->
+<div id="s-start" class="screen active">
+  <div class="card">
+    <span class="logo">ARA7469 · Estácio · 2026.1</span>
+    <h1>Morfologia Humana<br>e Processos</h1>
+    <p>15 questões sobre epitélios, tecido ósseo, embriologia e glândulas. Você tem <strong style="color:var(--text)">60 segundos</strong> por questão — respostas mais rápidas geram mais pontos.</p>
+    <div class="sep"></div>
+    <label>Seu nome completo</label>
+    <input type="text" id="inp-name" placeholder="Digite seu nome..." autocomplete="off"/>
+    <div class="btn-row">
+      <button class="primary" onclick="startQuiz()">Iniciar quiz →</button>
+      <button onclick="showRankingPrompt()">Ver ranking</button>
+    </div>
+    <div id="name-err" class="err"></div>
+  </div>
+  <p style="text-align:center;font-size:12px;color:var(--dim)">Prof. Bruno Eduardo Silva · Aracaju</p>
+</div>
+
+<!-- QUIZ -->
+<div id="s-quiz" class="screen">
+  <div class="quiz-meta">
+    <span class="pill pill-blue" id="q-num">Questão 1 / 15</span>
+    <span class="pill pill-amber" id="score-live">0 pts</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+  <div class="timer-row">
+    <div class="timer-track"><div class="timer-fill" id="tbar" style="width:100%"></div></div>
+    <span id="timer-num">60</span>
+  </div>
+  <div class="card">
+    <p class="q-text" id="q-text"></p>
+    <div id="opts"></div>
+    <div class="fb" id="fb"></div>
+  </div>
+  <div class="clearfix">
+    <button class="primary" id="btn-next" onclick="nextQ()">Próxima questão →</button>
+  </div>
+</div>
+
+<!-- END -->
+<div id="s-end" class="screen">
+  <div class="card">
+    <span class="logo">Resultado final</span>
+    <div class="score-display">
+      <span class="score-num" id="final-score">0</span>
+      <span class="score-label">PONTOS</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-v" id="st-hits">0</div><div class="stat-l">ACERTOS</div></div>
+      <div class="stat"><div class="stat-v" id="st-pct">0%</div><div class="stat-l">TAXA</div></div>
+      <div class="stat"><div class="stat-v" id="st-max">1050</div><div class="stat-l">MÁX. PTS</div></div>
+    </div>
+    <p id="final-msg" style="text-align:center;color:var(--accent2);font-weight:500;font-size:15px"></p>
+    <div class="sep"></div>
+    <div class="btn-row">
+      <button class="primary" onclick="restart()">Jogar novamente</button>
+      <button onclick="showRankingPrompt()">Ver ranking</button>
+    </div>
+  </div>
+</div>
+
+<!-- RANKING PASSWORD -->
+<div id="s-rank-pw" class="screen">
+  <div class="card">
+    <span class="logo">Acesso restrito</span>
+    <h2>Ranking de alunos</h2>
+    <p>O ranking é exclusivo para o professor. Insira a senha para continuar.</p>
+    <div class="sep"></div>
+    <label>Senha</label>
+    <input type="password" id="inp-pw" placeholder="••••••••••" onkeydown="if(event.key==='Enter')checkPw()"/>
+    <div class="btn-row">
+      <button class="primary" onclick="checkPw()">Entrar</button>
+      <button onclick="show('s-start')">Voltar</button>
+    </div>
+    <div id="pw-err" class="err"></div>
+  </div>
+</div>
+
+<!-- RANKING -->
+<div id="s-rank" class="screen">
+  <div class="card card-sm" style="display:flex;justify-content:space-between;align-items:center">
+    <span class="logo" style="margin:0">Ranking geral</span>
+    <button class="ghost-red" onclick="clearRanking()">Limpar ranking</button>
+  </div>
+  <div class="card" id="rank-list">
+    <p>Carregando...</p>
+  </div>
+  <button onclick="show('s-start')">← Voltar ao início</button>
+</div>
+
+</div>
+
+<script>
+const QUESTIONS=[
+  {
+    q:"Qual das glândulas a seguir possui secreção do tipo holócrina e está classificada como um anexo da pele?",
+    opts:["Glândula sudorípara éccrina","Glândula mucosa","Glândula mamária","Glândula sebácea","Glândula tireoide"],
+    ans:3
+  },
+  {
+    q:"O endotélio reveste o lúmen dos vasos sanguíneos. Qual é a classificação correta desse epitélio?",
+    opts:["Epitélio simples colunar","Epitélio estratificado cúbico","Epitélio simples pavimentoso","Epitélio estratificado de transição","Epitélio estratificado pavimentoso"],
+    ans:2
+  },
+  {
+    q:"Qual estrutura do tecido ósseo compacto é circundada por lamelas concêntricas de fibras colágenas, revestida pelo endósteo e conduz nervos e capilares sanguíneos?",
+    opts:["Canais de Volkmann","Osteoide","Centro de ossificação primária","Canais de Havers","Canalículos ósseos"],
+    ans:3
+  },
+  {
+    q:"O processo de gastrulação gera o disco embrionário trilaminar. Qual camada corresponde à região mais interna (inferior) desse disco?",
+    opts:["Ectoderma","Epiderme","Mesoderma","Camada epiblástica interna","Endoderma"],
+    ans:4
+  },
+  {
+    q:"As glândulas exócrinas são classificadas pelo mecanismo de secreção. Qual alternativa apresenta a associação correta?",
+    opts:["Glândulas sebáceas – Apócrina","Pâncreas – Holócrina","Glândulas sebáceas – Merócrina","Glândula mamária – Holócrina","Glândula mamária – Apócrina"],
+    ans:4
+  },
+  {
+    q:"No oitavo dia do desenvolvimento embrionário, o embrioblasto origina o disco bilaminar. Como são denominadas as duas camadas formadas nesse momento?",
+    opts:["Embrioblasto e trofoblasto","Citotrofoblasto e sinciotrofoblasto","Sinciotrofoblasto e blasto","Epiblasto e hipoblasto","Hipoblasto e blasto"],
+    ans:3
+  },
+  {
+    q:"A menarca é o primeiro evento marcante do ciclo reprodutivo feminino. A qual acontecimento fisiológico ela corresponde?",
+    opts:["À primeira relação sexual","Ao surgimento das características sexuais secundárias","Ao desenvolvimento das glândulas mamárias e produção de leite","À primeira menstruação","À primeira gravidez"],
+    ans:3
+  },
+  {
+    q:"Sobre a classificação dos epitélios, qual das seguintes afirmações é INCORRETA?",
+    opts:["O epitélio simples é ideal para trocas rápidas, como nos alvéolos pulmonares","O epitélio estratificado protege contra desgaste mecânico, como na epiderme","A membrana basal está presente apenas no epitélio simples, sendo ausente nos estratificados","Epitélios de revestimento cobrem superfícies corporais e cavidades","O número de camadas celulares define se o epitélio é simples ou estratificado"],
+    ans:2
+  },
+  {
+    q:"Qual é o epitélio que reveste a maior parte da cavidade nasal, bem como a traqueia e os brônquios?",
+    opts:["Simples pavimentoso","Simples cilíndrico com microvilosidades e células caliciformes","Pseudo-estratificado cilíndrico ciliado com células caliciformes","Estratificado pavimentoso","Pseudo-estratificado cilíndrico com microvilosidades queratinizado"],
+    ans:2
+  },
+  {
+    q:"Sobre as células presentes no intestino delgado, qual alternativa apresenta uma função INCORRETAMENTE atribuída?",
+    opts:["Células absortivas absorvem nutrientes liberados na digestão","Células caliciformes produzem anticorpos para proteção da mucosa","Células de Paneth combatem microrganismos patogênicos","Células-tronco regeneram o epitélio intestinal","Células caliciformes produzem muco protetor"],
+    ans:1
+  },
+  {
+    q:"As glândulas sudoríparas écrinas são o exemplo clássico de qual tipo de secreção exócrina, na qual o produto é eliminado por exocitose sem perda de citoplasma?",
+    opts:["Holócrina","Apócrina","Merócrina","Parácrina","Endócrina"],
+    ans:2
+  },
+  {
+    q:"Os osteócitos do tecido ósseo maduro ficam alojados em pequenas cavidades dentro da matriz mineralizada. Como essas cavidades são denominadas?",
+    opts:["Canalículos","Lacunas","Canais de Havers","Canais de Volkmann","Endósteo"],
+    ans:1
+  },
+  {
+    q:"O epitélio de transição (urotélio) é altamente especializado em se distender e retrair. Qual estrutura do sistema urinário ele tipicamente reveste?",
+    opts:["Túbulos renais","Uretra peniana","Bexiga urinária","Cálice renal menor","Pelve renal exclusivamente"],
+    ans:2
+  },
+  {
+    q:"Durante o desenvolvimento embrionário precoce, a implantação do blastocisto no endométrio uterino ocorre aproximadamente em qual período?",
+    opts:["1º ao 3º dia após a fertilização","4º ao 5º dia após a fertilização","6º ao 10º dia após a fertilização","14º ao 16º dia após a fertilização","21º ao 28º dia após a fertilização"],
+    ans:2
+  },
+  {
+    q:"As glândulas exócrinas diferem das glândulas endócrinas porque possuem uma característica estrutural essencial. Qual é essa característica?",
+    opts:["Secretam diretamente na corrente sanguínea","Não possuem células secretoras especializadas","Possuem ductos que conduzem a secreção até uma superfície ou cavidade corporal","São sempre constituídas por epitélio estratificado","Produzem exclusivamente hormônios proteicos"],
+    ans:2
+  }
+];
+
+const PW="Besa190918";
+const MAX_TIME=60;
+const MAX_SCORE=QUESTIONS.length*(10+MAX_TIME*3);
+
+let cur=0,score=0,hits=0,playerName="",timerInt=null,timeLeft=0,answered=false;
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function startQuiz(){
+  const n=document.getElementById('inp-name').value.trim();
+  if(!n){document.getElementById('name-err').textContent='Por favor, informe seu nome.';return;}
+  playerName=n;cur=0;score=0;hits=0;
+  document.getElementById('name-err').textContent='';
+  show('s-quiz');
+  renderQ();
+}
+
+function renderQ(){
+  const q=QUESTIONS[cur];
+  document.getElementById('q-num').textContent=`Questão ${cur+1} / ${QUESTIONS.length}`;
+  document.getElementById('prog').style.width=`${(cur/QUESTIONS.length)*100}%`;
+  document.getElementById('score-live').textContent=`${score} pts`;
+  document.getElementById('q-text').textContent=q.q;
+  const opts=document.getElementById('opts');
+  opts.innerHTML='';
+  const letters=['A','B','C','D','E'];
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="opt-letter">${letters[i]}</span>${o}`;
+    b.onclick=()=>answer(i,b,q.ans);
+    opts.appendChild(b);
+  });
+  document.getElementById('fb').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  answered=false;
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(timerInt);
+  timeLeft=MAX_TIME;
+  updateTimer();
+  timerInt=setInterval(()=>{
+    timeLeft--;
+    updateTimer();
+    if(timeLeft<=0){clearInterval(timerInt);autoFail();}
+  },1000);
+}
+
+function updateTimer(){
+  const el=document.getElementById('timer-num');
+  const bar=document.getElementById('tbar');
+  const pct=timeLeft/MAX_TIME;
+  el.textContent=timeLeft;
+  bar.style.width=`${pct*100}%`;
+  if(pct>0.5){bar.style.background='#22c55e';}
+  else if(pct>0.25){bar.style.background='#f59e0b';}
+  else{bar.style.background='#ef4444';}
+  el.style.color=pct>0.25?'var(--text)':'#ef4444';
+}
+
+function answer(idx,btn,correct){
+  if(answered)return;
+  answered=true;
+  clearInterval(timerInt);
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.opt')[correct].classList.add('correct');
+  const fb=document.getElementById('fb');
+  if(idx===correct){
+    btn.classList.add('correct');
+    const pts=10+timeLeft*3;
+    score+=pts;hits++;
+    fb.className='fb ok';
+    fb.innerHTML=`✓ Correto! <strong>+${pts} pontos</strong> (bônus de velocidade: +${timeLeft*3} pts)`;
+  }else{
+    btn.classList.add('wrong');
+    fb.className='fb ko';
+    fb.innerHTML='✗ Incorreto. A resposta correta está destacada em verde.';
+  }
+  fb.style.display='block';
+  document.getElementById('score-live').textContent=`${score} pts`;
+  document.getElementById('btn-next').style.display='inline-block';
+}
+
+function autoFail(){
+  if(answered)return;
+  answered=true;
+  const q=QUESTIONS[cur];
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.opt')[q.ans].classList.add('correct');
+  const fb=document.getElementById('fb');
+  fb.className='fb ko';
+  fb.innerHTML='⏱ Tempo esgotado! Nenhum ponto para esta questão.';
+  fb.style.display='block';
+  document.getElementById('btn-next').style.display='inline-block';
+}
+
+function nextQ(){
+  cur++;
+  if(cur>=QUESTIONS.length){endQuiz();}else{renderQ();}
+}
+
+function endQuiz(){
+  show('s-end');
+  document.getElementById('prog').style.width='100%';
+  document.getElementById('final-score').textContent=score;
+  document.getElementById('st-hits').textContent=`${hits}/15`;
+  document.getElementById('st-pct').textContent=`${Math.round((hits/QUESTIONS.length)*100)}%`;
+  document.getElementById('st-max').textContent=MAX_SCORE;
+  const msgs=[
+    [13,'Excelente! Domínio impressionante da matéria!'],
+    [10,'Muito bom! Mais um pouco e você gabarita!'],
+    [7,'Razoável — revise os temas com menor acerto.'],
+    [0,'Precisa reforçar os estudos. Não desista!']
+  ];
+  document.getElementById('final-msg').textContent=msgs.find(([t])=>hits>=t)[1];
+  saveRanking();
+}
+
+function saveRanking(){
+  let entries=[];
+  try{entries=JSON.parse(localStorage.getItem('quiz_morpho_rank')||'[]');}catch(e){}
+  entries.push({name:playerName,score,hits,date:new Date().toLocaleDateString('pt-BR'),ts:Date.now()});
+  entries.sort((a,b)=>b.score-a.score);
+  try{localStorage.setItem('quiz_morpho_rank',JSON.stringify(entries));}catch(e){}
+}
+
+function showRankingPrompt(){
+  document.getElementById('inp-pw').value='';
+  document.getElementById('pw-err').textContent='';
+  show('s-rank-pw');
+}
+
+function checkPw(){
+  if(document.getElementById('inp-pw').value===PW){loadRanking();}
+  else{document.getElementById('pw-err').textContent='Senha incorreta. Tente novamente.';}
+}
+
+function loadRanking(){
+  show('s-rank');
+  let entries=[];
+  try{entries=JSON.parse(localStorage.getItem('quiz_morpho_rank')||'[]');}catch(e){}
+  const list=document.getElementById('rank-list');
+  if(!entries.length){
+    list.innerHTML='<p style="color:var(--dim)">Nenhum resultado registrado ainda.</p>';
+    return;
+  }
+  const posClass=['gold','silver','bronze'];
+  const posLabel=['#1','#2','#3'];
+  list.innerHTML=entries.map((e,i)=>`
+    <div class="rank-item">
+      <span class="rank-pos ${posClass[i]||''}">${posLabel[i]||`#${i+1}`}</span>
+      <span class="rank-name">${e.name}</span>
+      <span class="rank-hits">${e.hits}/15</span>
+      <span class="rank-score">${e.score} pts</span>
+      <span class="rank-date">${e.date}</span>
+    </div>`).join('');
+}
+
+function clearRanking(){
+  if(!confirm('Apagar todo o ranking? Esta ação não pode ser desfeita.'))return;
+  localStorage.removeItem('quiz_morpho_rank');
+  document.getElementById('rank-list').innerHTML='<p style="color:var(--dim)">Ranking apagado.</p>';
+}
+
+function restart(){
+  show('s-start');
+  document.getElementById('inp-name').value='';
+}
+</script>
+</body>
+</html>
